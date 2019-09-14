@@ -44,8 +44,11 @@ class Control():
         elif prefix.startswith('r'):
             cmds.setAttr(ctrl_shape + '.ovc', 13) #override color
         
-        else:
+        elif prefix.startswith('c'):
             cmds.setAttr(ctrl_shape + '.ovc', 22) #override color
+        
+        else:
+            cmds.setAttr(ctrl_shape + '.ovc', 18) #override color
         
         
         #translate control
