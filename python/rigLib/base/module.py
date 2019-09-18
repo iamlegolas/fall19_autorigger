@@ -7,6 +7,13 @@ from . import control
 
 scene_object_type = 'rig'
 
+master_ctrl_temp = 'master_ctrl_template'
+teardrop_ctrl_temp = 'teardrop_ctrl_template'
+cube_ctrl_temp = 'cube_ctrl_template'
+sphere_ctrl_temp = 'sphere_ctrl_template'
+pin_ctrl_temp = 'pin_ctrl_template'
+bowl_ctrl_temp = 'bowl_ctrl_template'
+
 class Base():
     
     """
@@ -23,16 +30,17 @@ class Base():
         """
         @param character_name: str, character name
         @param scale: float, general scale of the rig
+        @param main_ctrl_attach_obj: ?????
         @return: None
         """
         
-        self.top_grp = cmds.group(name=character_name+'_rig_grp', empty=True)
+        self.top_grp = cmds.group(name=character_name+'_grp', empty=True)
         self.rig_grp = cmds.group(name='rig_grp', empty=True, parent=self.top_grp)
         self.geo_grp = cmds.group(name='geo_grp', empty=True, parent=self.top_grp)
         
+        #create attrs for top_grp
         character_name_attr = 'character_name'
         scene_object_type_attr = 'scene_object_type'
-        
         for attr in [character_name_attr, scene_object_type_attr]:
             cmds.addAttr(self.top_grp, longName=attr, dataType='string')
 

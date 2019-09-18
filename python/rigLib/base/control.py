@@ -12,8 +12,9 @@ class Control():
     
     def __init__(
                 self,
+                shape = '',
                 prefix='new',
-                scale='1.0',
+                scale=1.0,
                 translate_to='',
                 rotate_to='',
                 parent='',
@@ -30,7 +31,16 @@ class Control():
         @return: None 
         """
         
-        ctrl_object = cmds.circle(name=prefix+'_ctrl', ch=False, normal=[1,0,0], radius=scale)[0]
+        if cmds.objExists(shape):
+            ctrl_object = cmds.duplicate(shape)[0]
+            cmds.scale(scale, scale, scale, ctrl_object, pivot=(0, 0, 0), absolute=True)
+            cmds.makeIdentity(ctrl_object, t=0, r=0, s=1, apply=True)
+            cmds.parent(ctrl_object, world=True)
+        
+        else:
+            ctrl_object = cmds.circle(ch=False, normal=[1,0,0], radius=scale)[0]
+
+        ctrl_object = cmds.rename(ctrl_object, prefix+'_ctrl')
         ctrl_offset = cmds.group(n=prefix+'_ofst', empty=True)
         cmds.parent(ctrl_object, ctrl_offset)
         
@@ -44,11 +54,8 @@ class Control():
         elif prefix.startswith('r'):
             cmds.setAttr(ctrl_shape + '.ovc', 13) #override color
         
-        elif prefix.startswith('c'):
-            cmds.setAttr(ctrl_shape + '.ovc', 22) #override color
-        
         else:
-            cmds.setAttr(ctrl_shape + '.ovc', 18) #override color
+            cmds.setAttr(ctrl_shape + '.ovc', 22) #override color
         
         
         #translate control
