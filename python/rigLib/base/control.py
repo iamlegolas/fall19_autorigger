@@ -83,6 +83,6 @@ class Control():
             
             
         #add public members
-        self.ctrl_name = ctrl_object
-        self.ofst_name = ctrl_offset
+        self.ctrl = ctrl_object
+        self.ofst = ctrl_offset
     

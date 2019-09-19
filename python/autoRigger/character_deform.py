@@ -14,20 +14,11 @@ skin_weights_dir = 'weights/skinCluster'
 skin_weights_ext = '.swt'
 
 def build(base_rig, character_name):
-    
     model_grp = '%s_geo' % character_name
-    
-    #make twist joints
-    ref_twist_jnts=['calf_l_bnd', 'calf_r_bnd']
-    make_twist_jnts(base_rig, ref_twist_jnts)
-    
+        
     #load skin weights
     geo_list = get_model_geo_objs(model_grp)
     load_skin_weights(character_name, geo_list)
-    
-    #apply mush deformer
-    
-    #wrap hires body mesh
     
     
 def get_model_geo_objs(model_grp):
