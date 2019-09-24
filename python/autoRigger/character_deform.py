@@ -10,7 +10,7 @@ from . import project
 from rigTools import bSkinSaver
 from rigLib.utils import name
 
-skin_weights_dir = 'weights/skinCluster'
+skin_weights_dir = 'weights/skin_cluster'
 skin_weights_ext = '.swt'
 
 def build(base_rig, character_name):

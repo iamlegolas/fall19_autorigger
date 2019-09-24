@@ -15,7 +15,7 @@ class Control():
                 shape = '',
                 prefix='new',
                 scale=1.0,
-                translate_to='',
+                translate_to=[],
                 rotate_to='',
                 parent='',
                 lock_channels=['v']
@@ -24,7 +24,7 @@ class Control():
         """
         @param prefix: str, prefix to the name of new modules
         @param scale: float, scale value for control shapes
-        @param translate_to: str, reference object for control position
+        @param translate_to: list(str), reference object for control position
         @param rotate_to: str, reference object for control orientation
         @param parent: str, object to be parent of new control
         @param lock_channels: list(str), list of channels on control to be locked and non-keyable
@@ -59,7 +59,7 @@ class Control():
         
         
         #translate control
-        if cmds.objExists(translate_to):
+        if len(translate_to) > 0:#cmds.objExists(translate_to):
             cmds.delete(cmds.pointConstraint(translate_to, ctrl_offset))
         #rotate control
         if cmds.objExists(rotate_to):
