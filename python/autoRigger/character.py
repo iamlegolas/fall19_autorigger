@@ -50,10 +50,9 @@ def build(character_name):
     cmds.parent(root_bnd_jnt, base_rig.top_grp)
     
     #deform setup
-    character_deform.build(base_rig, character_name)
+#    character_deform.build(base_rig, character_name)
     
     #control setup
-#    make_control_setup(base_rig)
     spine.build(pelvis_jnt=pelvis_jnt, spine_jnts=spine_jnts, base_rig=base_rig)
     
     

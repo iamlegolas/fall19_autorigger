@@ -7,6 +7,7 @@ import maya.cmds as cmds
 from ..base import module
 from ..base import control
 from rigLib.utils import joint, ribbon
+from rigLib.utils.ribbon import loft_using_curve
 
 def build(
         pelvis_jnt,
@@ -31,7 +32,7 @@ def build(
     """
     
     #make rig module
-    rig_module = module.Module(prefix='spine', base_obj=base_rig)
+    rig_module = module.Module(prefix=prefix, base_obj=base_rig)
     
     
     #make spine controls
@@ -50,7 +51,7 @@ def build(
                                 translate_to=spine_jnts[len(spine_jnts)-1], scale=rig_scale,
                                 parent=body_ctrl.ctrl, lock_channels=['s'])
     
-    spine_ctrl = control.Control(shape='spine_ctrl_template', prefix='spine',
+    spine_ctrl = control.Control(shape='spine_ctrl_template', prefix=prefix,
                                 translate_to=[hip_ctrl.ctrl, chest_ctrl.ctrl], scale=rig_scale,
                                 parent=body_ctrl.ctrl, lock_channels=['s'])
     ctrl_shape = cmds.listRelatives(spine_ctrl.ctrl, shapes=True)[0]
@@ -59,8 +60,8 @@ def build(
     
     
     #set up the ribbon
-    
     ribbon.create_curve_using('temp_spine_ribbon_crv_01', spine_jnts)
+    ribbon.loft_using_curve('temp_spine_ribbon_crv_01', 8, prefix)
     
     '''
     #make spineIK
