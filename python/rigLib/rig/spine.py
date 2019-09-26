@@ -61,7 +61,11 @@ def build(
     
     #set up the ribbon
     ribbon.create_curve_using('temp_spine_ribbon_crv_01', spine_jnts)
-    ribbon.loft_using_curve('temp_spine_ribbon_crv_01', 8, prefix)
+    ribbon_sfc = ribbon.loft_using_curve('temp_spine_ribbon_crv_01', 8, prefix)
+    spine_follicles = ribbon.add_follicles(ribbon_sfc, 4)
+    spine_ik_jnts = joint.duplicate(spine_jnts, prefix='ik')
+    
+    
     
     '''
     #make spineIK

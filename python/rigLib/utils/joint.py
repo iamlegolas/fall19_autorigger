@@ -24,3 +24,16 @@ def list_jnt_hierarchy(top_jnt, with_end_jnts=True):
         complete_jnts = [j for j in listed_jnts if cmds.listRelatives(j, c=True, type='joint')]
         
     return complete_jnts
+
+
+def duplicate(objs, prefix=''):
+    if type(objs) == str:
+        objs = [objs]
+        
+    dup_list = []
+    for obj in objs:
+        dup = cmds.duplicate(obj, name=prefix+'_'+obj, po=True)
+        cmds.parent(dup, world=True)
+        dup_list.append(dup)
+
+    return dup_list

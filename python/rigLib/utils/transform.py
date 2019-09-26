@@ -34,3 +34,30 @@ def make_offset_grp(obj, prefix=''):
     
     return offset_grp
     
+    
+def snap(driver, driven):
+    """
+    matches the translation and orientation of an object to another object
+    
+    @param driver: str, name of object to be snapped to
+    @param driven: str, name of object being snapped
+    @return: None
+    """
+    cmds.delete(cmds.parentConstraint(driver, driven)[0])
+    
+    
+def point_snap(driver, driven):
+    """
+    matches the translation of an object to another object
+    
+    @param driver: str, name of object to be snapped to
+    @param driven: str, name of object being snapped
+    @return: None
+    """
+    cmds.delete(cmds.pointConstraint(driver, driven)[0])
+    
+    
+    
+    
+    
+    
