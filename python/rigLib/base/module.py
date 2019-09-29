@@ -66,7 +66,8 @@ class Module():
     def __init__(
             self,
             prefix='new',
-            base_obj=None 
+            create_dnt_grp=False,
+            base_obj=None
             ):
         
         """
@@ -79,6 +80,9 @@ class Module():
         
         self.jnt_grp = cmds.group(name=prefix+'_drv_grp', empty=True, parent=self.top_grp)
         self.ctrl_grp = cmds.group(name=prefix+'_anim_grp', empty=True, parent=self.top_grp)
+        
+        if create_dnt_grp == True:
+            self.dnt_grp = cmds.group(name=prefix+'_dnt_grp', empty=True, parent=base_obj.dnt_grp)
         
         #self.misc_grp = cmds.group(name=prefix+'_misc_grp', empty=True, parent=self.top_grp) #for ik handles and such
         #self.dnt_grp = cmds.group(name=prefix+'_parts_grp', empty=True, parent=self.top_grp) #for things that aren't going to have transformations

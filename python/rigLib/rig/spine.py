@@ -7,7 +7,7 @@ import maya.cmds as cmds
 from ..base import module
 from ..base import control
 from rigLib.utils import joint, ribbon
-from rigLib.utils.ribbon import loft_using_curve
+from rigLib.utils.ribbon import loft_using_curve, create_ep_curve
 
 def build(
         pelvis_jnt,
@@ -32,7 +32,7 @@ def build(
     """
     
     #make rig module
-    rig_module = module.Module(prefix=prefix, base_obj=base_rig)
+    rig_module = module.Module(prefix=prefix, base_obj=base_rig, create_dnt_grp=True)
     
     
     #make spine controls
@@ -59,16 +59,59 @@ def build(
     cmds.setAttr(ctrl_shape + '.ovc', 18)
     
     
-    #set up the ribbon
-    ribbon.create_curve_using('temp_spine_ribbon_crv_01', spine_jnts)
+    #SET UP RIBBON
+    #create ribbon surface and add follicles
+    ribbon.create_cv_curve('temp_spine_ribbon_crv_01', spine_jnts)
     ribbon_sfc = ribbon.loft_using_curve('temp_spine_ribbon_crv_01', 8, prefix)
     spine_follicles = ribbon.add_follicles(ribbon_sfc, 4)
     spine_ik_jnts = joint.duplicate(spine_jnts, prefix='ik')
+
+    spine_follicles_grp = '_'.join([prefix,'follicles','grp'])
+    cmds.group(spine_follicles, n=spine_follicles_grp)
     
+    for i in range(len(spine_ik_jnts)):
+        cmds.parent(spine_ik_jnts[i], spine_follicles[i])
     
+    #create ribbon_wire_curve to drive the surface using wire deformer
+    ribbon_wire_curve = 'ribbon_wire_crv'
+    create_ep_curve(curve=ribbon_wire_curve, 
+                          pos_ref_list=[spine_jnts[0], spine_jnts[len(spine_jnts)-1]],
+                           degree=2)
     
+    #create and add clusters
+    ribbon_clstr_list = []
+    for i in range(ribbon.get_curve_num_cvs(ribbon_wire_curve)):
+        cmds.select(ribbon_wire_curve+'.cv[%d]' % i)
+        temp_clstr_name = 'ribbon_clstr_'+str(i).zfill(2)+'_'
+        ribbon_clstr_list.append(cmds.cluster(name=temp_clstr_name)[1])
+        cmds.setAttr(temp_clstr_name+'Handle.visibility', 0)
+        
+    ribbon_clstrs_grp = cmds.group(ribbon_clstr_list, n='ribbon_clstrs_grp')
     
+    #create wire deformer
+    cmds.wire(ribbon_sfc, w=ribbon_wire_curve, dds=(0,50))
+    ribbon_wire_grp = cmds.group([ribbon_wire_curve, ribbon_wire_curve+'BaseWire'],
+                                  n='ribbon_wire_grp')
     
+    #fix orientations for ik_spine_jnts
+    for i in range(1,len(spine_ik_jnts))[::-1]:
+        temp_jnt_driver = '_'.join(['ik', prefix, str(i+1).zfill(2)])
+        temp_jnt_driven = '_'.join(['ik', prefix, str(i).zfill(2)])
+        cmds.aimConstraint(temp_jnt_driver, temp_jnt_driven, 
+                            aim=(1.0,0.0,0.0), wut='objectrotation', 
+                            wuo=temp_jnt_driver)
+
+    #set up ctrl constraints
+    '''
+    cmds.parentConstraint(hip_anim, ribbon_clstr_list[0], mo=True)
+    cmds.parentConstraint(spine_anim, ribbon_clstr_list[1], mo=True)
+    cmds.parentConstraint(chest_anim, ribbon_clstr_list[2], mo=True)
+    '''
+
+    #cleanup
+#    cmds.parent([spine_follicles_grp, ribbon_wire_grp, ribbon_clstrs_grp],
+#                 rig_module.dnt_grp)
+            
     '''
     #make spineIK
     spine_ik_name = prefix+'_ikh'

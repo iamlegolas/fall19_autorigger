@@ -5,12 +5,13 @@ has different service functions required while working with ribbons
 
 import maya.cmds as cmds
 
-def create_curve_using(curve, pos_ref_list):
+def create_cv_curve(curve, pos_ref_list, degree=3):
     """
     create CV curve with CVs at positions of the objects in pos_ref_list
     
     @param curve: str, name of the CV curve to be created
     @param pos_ref_list: list(str), list of object names to extract positions from
+    @param degree: the degree of the new curve
     @return None
     """
     
@@ -18,11 +19,40 @@ def create_curve_using(curve, pos_ref_list):
     for obj in pos_ref_list:
         obj_pos_list.append(cmds.xform(obj, q=True, ws=True, t=True))
     
-    cmds.curve(n=curve, point=[obj_pos_list[0]])
+    cmds.curve(n=curve, point=[obj_pos_list[0]], d=degree)
 
     for i in range(1, len(pos_ref_list)):
         cmds.curve(curve, append=True, point=[obj_pos_list[i]], ws=True)
+   
         
+def create_ep_curve(curve, pos_ref_list, degree=3):
+    """
+    create EP curve with EditPoints at positions of the objects in pos_ref_list
+    
+    @param curve: str, name of the EP curve to be created
+    @param pos_ref_list: list(str), list of object names to extract positions from
+    @param degree: the degree of the new curve
+    @return None
+    """
+    obj_pos_list = []
+    for obj in pos_ref_list:
+        obj_pos_list.append(cmds.xform(obj, q=True, ws=True, t=True))
+    
+    cmds.curve(n=curve, ep=obj_pos_list, d=degree)
+        
+def get_curve_num_cvs(curve):
+    """
+    calculate and return number of CVs in a curve
+    
+    @param curve: str, name of the curve to be created
+    @return int: number of CVs in the curve
+    """
+    curve_degree = cmds.getAttr(curve + '.degree')
+    curve_spans = cmds.getAttr(curve + '.spans')
+    
+    return curve_degree + curve_spans
+    
+    
         
 def loft_using_curve(curve, width, prefix):
     """
@@ -62,9 +92,9 @@ def add_follicles(sfc_shape, num_foll=1):
         foll = create_follicle('spine_ribbon_sfc', 0.5, i/(num_foll-1.00))
         foll_list.append(foll)
         
-    foll_grp = sfc_shape+'_follicles_grp'
-    cmds.group(name=foll_grp, world=True, em=True)
-    cmds.parent(foll_list, foll_grp)
+    #foll_grp = sfc_shape+'_follicles_grp'
+    #cmds.group(name=foll_grp, world=True, em=True)
+    #cmds.parent(foll_list, foll_grp)
     
     return foll_list
 
