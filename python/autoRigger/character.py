@@ -29,7 +29,7 @@ def build(character_name):
     """
     
     #new scene
-#    cmds.file(new=True, force=True)
+    cmds.file(new=True, force=True)
     
     #import builder scene
     builder_file = builder_file_path % (main_project_path, character_name)
@@ -50,7 +50,7 @@ def build(character_name):
     cmds.parent(root_bnd_jnt, base_rig.top_grp)
     
     #deform setup
-#    character_deform.build(base_rig, character_name)
+    character_deform.build(base_rig, character_name)
     
     #control setup
     spine.build(pelvis_jnt=pelvis_jnt, spine_jnts=spine_jnts, base_rig=base_rig)

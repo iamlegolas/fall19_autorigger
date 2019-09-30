@@ -93,7 +93,7 @@ def build(
     ribbon_wire_grp = cmds.group([ribbon_wire_curve, ribbon_wire_curve+'BaseWire'],
                                   n='ribbon_wire_grp')
     
-    #fix orientations for ik_spine_jnts
+    #fix orientations for spine_ik_jnts
     for i in range(1,len(spine_ik_jnts))[::-1]:
         temp_jnt_driver = '_'.join(['ik', prefix, str(i+1).zfill(2)])
         temp_jnt_driven = '_'.join(['ik', prefix, str(i).zfill(2)])
@@ -101,70 +101,82 @@ def build(
                             aim=(1.0,0.0,0.0), wut='objectrotation', 
                             wuo=temp_jnt_driver)
 
+    #setup ribbon twist
+    ribbon_twist_sfc = 'spine_ribbon_twist_surface'
+    cmds.duplicate(ribbon_sfc, n=ribbon_twist_sfc)
+    twist_handle = ribbon.create_twist_deformer(sfc=ribbon_twist_sfc, prefix=prefix)
+
+    connect_twist_ribbon(prefix, twist_handle, hip_ctrl, 'start')
+    connect_twist_ribbon(prefix, twist_handle, chest_ctrl, 'end')
+    
+    ribbon_bs = prefix+'_ribbon_blendshape'
+    cmds.blendShape(ribbon_twist_sfc, ribbon_sfc, n=ribbon_bs)
+    cmds.setAttr(ribbon_bs+'.'+ribbon_twist_sfc, 1)
+    
+    cmds.select(hip_ctrl.ctrl, chest_ctrl.ctrl)
+    cmds.xform(rotateOrder='yzx')
+    
+    cmds.select(ribbon_sfc)
+    cmds.reorderDeformers('wire1', ribbon_bs)
+    
+    
+    #set up skel constraints
+    cmds.select(d=True)
+    for i in range(len(spine_jnts)-1):
+        driver = spine_ik_jnts[i]
+        driven = spine_jnts[i]
+        cmds.pointConstraint(driver, driven, maintainOffset=False)
+        cmds.orientConstraint(driver, driven, maintainOffset=False)
+    
+    ik_spine_04_orient_jnt = spine_ik_jnts[3]+'_orient'
+    cmds.duplicate(spine_ik_jnts[3], n=ik_spine_04_orient_jnt)
+    cmds.parent(ik_spine_04_orient_jnt, chest_ctrl.ctrl)
+    cmds.makeIdentity(ik_spine_04_orient_jnt, t=0, r=1, s=0, apply=True)
+    cmds.pointConstraint(ik_spine_04_orient_jnt, spine_jnts[3], maintainOffset=False)
+    cmds.orientConstraint(ik_spine_04_orient_jnt, spine_jnts[3], maintainOffset=False)
+    
+    pelvis_orient_jnt = 'pelvis_orient'
+    cmds.duplicate('pelvis', n=pelvis_orient_jnt, rc=True)
+    cmds.delete(cmds.listRelatives(pelvis_orient_jnt))
+    
+    cmds.parent(pelvis_orient_jnt, hip_ctrl.ctrl)
+    cmds.makeIdentity(pelvis_orient_jnt, t=0, r=1, s=0, apply=True)
+    cmds.pointConstraint(pelvis_orient_jnt, 'pelvis', maintainOffset=False)
+    cmds.orientConstraint(pelvis_orient_jnt, 'pelvis', maintainOffset=False)
+    
+    
+    
     #set up ctrl constraints
-    '''
-    cmds.parentConstraint(hip_anim, ribbon_clstr_list[0], mo=True)
-    cmds.parentConstraint(spine_anim, ribbon_clstr_list[1], mo=True)
-    cmds.parentConstraint(chest_anim, ribbon_clstr_list[2], mo=True)
-    '''
+    cmds.parentConstraint(hip_ctrl.ctrl, ribbon_clstr_list[0], mo=True)
+    cmds.parentConstraint(spine_ctrl.ctrl, ribbon_clstr_list[1], mo=True)
+    cmds.parentConstraint(chest_ctrl.ctrl, ribbon_clstr_list[2], mo=True)
+
 
     #cleanup
+    cmds.group([ribbon_sfc, ribbon_twist_sfc], name='spine_sfc_grp')
+    cmds.group(twist_handle, name='spine_deformers_grp')
 #    cmds.parent([spine_follicles_grp, ribbon_wire_grp, ribbon_clstrs_grp],
 #                 rig_module.dnt_grp)
-            
-    '''
-    #make spineIK
-    spine_ik_name = prefix+'_ikh'
-    spine_crv_name = 'spine_crv'
-    spine_ik = cmds.ikHandle(n=spine_ik_name, sol='ikSplineSolver', sj=spine_jnts[0], ee=spine_jnts[len(spine_jnts)-1])
-    spine_crv = cmds.listRelatives(cmds.listRelatives(spine_ik)[0], p=True, type='transform')[0]
-    cmds.rename(spine_crv, spine_crv_name)
-    
-    cmds.hide(spine_ik_name)
-    cmds.parent(spine_ik_name, rig_module.parts_grp)
-    
-    #make spine curve clusters
-    spine_crv_cvs = cmds.ls(spine_crv_name + '.cv[*]', fl=True) #fl=flatten so we have one CV for each item
-    num_spine_cvs = len(spine_crv_cvs)
-    spine_crv_cls = []
-    
-    for i in range(num_spine_cvs):
-        
-        cls = cmds.cluster(spine_crv_cvs[i], n=prefix+'_cls_%d' % (i+1))[1]
-        spine_crv_cls.append(cls)
-        
-    cmds.hide(spine_crv_cls)
-    
-    #make controls
-    body_ctrl = control.Control(prefix=prefix+'_body', translate_to=body_loc, scale=rig_scale*10, 
-                                parent=rig_module.ctrl_grp)
-    
-    chest_ctrl = control.Control(prefix=prefix+'_chest', translate_to=chest_loc, scale=rig_scale*10, 
-                                parent=body_ctrl.ctrl_name)
-    
-    pelvis_ctrl = control.Control(prefix=prefix+'_pelvis', translate_to=pelvis_loc, scale=rig_scale*10, 
-                                parent=body_ctrl.ctrl_name)
-    
-    mid_ctrl = control.Control(prefix=prefix+'_mid', translate_to=spine_crv_cls[2], scale=rig_scale*10, 
-                                parent=body_ctrl.ctrl_name)
-    
-    #attach controls
-    cmds.parentConstraint(chest_ctrl.ctrl_name, pelvis_ctrl.ctrl_name, mid_ctrl.ofst_name, sr=['x','y','z'], mo=True)
 
-    #attach clusters
-    cmds.parent(spine_crv_cls[3:], chest_ctrl.ctrl_name)
-    cmds.parent(spine_crv_cls[2], mid_ctrl.ctrl_name)
-    cmds.parent(spine_crv_cls[:2], pelvis_ctrl.ctrl_name)
 
-    #setup IK twist
-    cmds.setAttr(spine_ik_name+'.dTwistControlEnable', True)
-    cmds.setAttr(spine_ik_name+'.dWorldUpType', 1)
-    """
-    cmds.connectAttr(chest_ctrl.ctrl_name + '.worldMatrix[0]', spine_ik_name + '.dWorldUpMatrixEnd')
-    cmds.connectAttr(pelvis_ctrl.ctrl_name + '.worldMatrix[0]', spine_ik_name + '.dWorldUpMatrix')
+def connect_twist_ribbon(prefix, twist_handle, ctrl='', angle='start'): 
+    if angle == 'start':
+        twist_mult_node = prefix+'_twist_start_mult_node'
+    elif angle == 'end':
+        twist_mult_node = prefix+'_twist_end_mult_node'
+    else: 
+        print 'Error: Angle parameter can either be "start" or "end"'
+        pass
     
-    ##he added a parent constraint here for root_jnt being driven by the pelvis_ctrl
+    cmds.createNode('multiplyDivide', n=twist_mult_node)
+    cmds.setAttr(twist_mult_node+'.input2X', -1)
+    cmds.connectAttr(ctrl.ctrl+'.rotateY', twist_mult_node+'.input1X')
+#    cmds.connectAttr(twist_mult_node+'.outputX', twist_handle[0]+'.'+angle+'Angle')
+
     
-    return {'module':rig_module}
-    """
-    '''
+    
+    
+    
+    
+    
+        

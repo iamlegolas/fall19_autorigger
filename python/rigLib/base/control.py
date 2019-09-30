@@ -28,11 +28,11 @@ class Control():
         @param rotate_to: str, reference object for control orientation
         @param parent: str, object to be parent of new control
         @param lock_channels: list(str), list of channels on control to be locked and non-keyable
-        @return: None 
+        @return: None
         """
         
         if cmds.objExists(shape):
-            ctrl_object = cmds.duplicate(shape)[0]
+            ctrl_object = cmds.duplicate(shape, rc=True)[0]
             cmds.scale(scale, scale, scale, ctrl_object, pivot=(0, 0, 0), absolute=True)
             cmds.makeIdentity(ctrl_object, t=0, r=0, s=1, apply=True)
             cmds.parent(ctrl_object, world=True)
@@ -46,7 +46,9 @@ class Control():
         
         #color control
         ctrl_shape = cmds.listRelatives(ctrl_object, shapes=True)[0]
-        cmds.setAttr(ctrl_shape + '.ove', 1) #enable overrides
+        cmds.rename(ctrl_shape, ctrl_object+'_shape')
+        ctrl_shape = ctrl_object+'_shape'
+        cmds.setAttr(ctrl_shape + '.ove', True) #enable overrides
         
         if prefix.startswith('l'):
             cmds.setAttr(ctrl_shape + '.ovc', 6) #override color
@@ -85,4 +87,12 @@ class Control():
         #add public members
         self.ctrl = ctrl_object
         self.ofst = ctrl_offset
+        
+    
+    
+    
+    
+    
+    
+    
     

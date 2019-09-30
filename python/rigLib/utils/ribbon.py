@@ -135,6 +135,37 @@ def create_follicle(sfc_shape, u_pos=0.0, v_pos=0.0):
     return foll_transform
     
     
+def create_twist_deformer(sfc, prefix=''):
+    """
+    create a single follicle at given u&v on a surface and make necessary attribute connections
     
+    @param sfc: str, name of the surface we want apply bend deformer to
+    @param prefix: str, name of body part for which the ribbon is being constructed
+    @return: list(str), list of length 2 with names of deformer twist obj and twist-handle obj
+    """
+    
+    twist_handle = cmds.nonLinear(sfc, type='twist')
+    cmds.rename(twist_handle[0], prefix+'_twist')
+    cmds.rename(twist_handle[1], prefix+'_twist_handle')
+    twist_handle[0] = prefix+'_twist'
+    twist_handle[1] = prefix+'_twist_handle'
+    
+    return twist_handle
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     

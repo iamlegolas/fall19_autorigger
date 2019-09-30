@@ -34,6 +34,6 @@ def duplicate(objs, prefix=''):
     for obj in objs:
         dup = cmds.duplicate(obj, name=prefix+'_'+obj, po=True)
         cmds.parent(dup, world=True)
-        dup_list.append(dup)
+        dup_list.append(dup[0])
 
     return dup_list
