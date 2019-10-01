@@ -13,7 +13,6 @@ def list_jnt_hierarchy(top_jnt, with_end_jnts=True):
     @param with_end_jnts: boolean, list hierarchy to include end joints or not?
     @return list(str), listed joints starting with top joint
     """
-    
     listed_jnts = cmds.listRelatives(top_jnt, type='joint', allDescendents=True)
     listed_jnts.append(top_jnt)
     listed_jnts.reverse()
@@ -27,6 +26,13 @@ def list_jnt_hierarchy(top_jnt, with_end_jnts=True):
 
 
 def duplicate(objs, prefix=''):
+    """
+    duplicates a list of items and parents duplicates to world
+    
+    @param objs: list(str), list of objects to be duplicated
+    @param prefix: str, prefix for the duplicated objects
+    @return list(str), list of duplicated objects
+    """
     if type(objs) == str:
         objs = [objs]
         
