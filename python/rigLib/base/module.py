@@ -54,8 +54,7 @@ class Base():
                         lock_channels=['s', 'v'])
         
         self.dnt_grp = cmds.group(name='rig_dnt_grp', empty=True, parent=self.rig_grp) #this will not inherit the rig movement
-        cmds.setAttr(self.dnt_grp+'.visibility', False)
-        #cmds.setAttr(self.dnt_grp+'.it', False, l=True) #.it = inheritTransforms        
+        cmds.setAttr(self.dnt_grp+'.visibility', False)   
 
 class Module():
     
@@ -83,11 +82,7 @@ class Module():
         
         if create_dnt_grp == True:
             self.dnt_grp = cmds.group(name=prefix+'_dnt_grp', empty=True, parent=base_obj.dnt_grp)
-        
-        #self.misc_grp = cmds.group(name=prefix+'_misc_grp', empty=True, parent=self.top_grp) #for ik handles and such
-        #self.dnt_grp = cmds.group(name=prefix+'_parts_grp', empty=True, parent=self.top_grp) #for things that aren't going to have transformations
-        #cmds.setAttr(self.dnt_grp+'.it', False, l=True) #.it = inheritTransforms
-        
+
         #parent module
         if base_obj:
             cmds.parent(self.top_grp, base_obj.master_ctrl.ctrl)

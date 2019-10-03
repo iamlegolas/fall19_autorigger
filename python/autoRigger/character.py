@@ -6,6 +6,7 @@ main setup
 #from rigLib.base import control
 from rigLib.base import module
 from rigLib.rig import spine
+from rigLib.rig import leg
 
 from . import project
 from . import character_deform
@@ -22,6 +23,8 @@ head_bnd_jnt = 'head_bnd'
 
 pelvis_jnt = 'pelvis'
 spine_jnts = ['spine_01', 'spine_02', 'spine_03', 'spine_04']
+l_leg_jnts = ['thigh_l', 'calf_l', 'ankle_l', 'ball_l', 'toe_l']
+r_leg_jnts = ['thigh_r', 'calf_r', 'ankle_r', 'ball_r', 'toe_r']
 
 def build(character_name):
     """
@@ -54,7 +57,8 @@ def build(character_name):
     
     #control setup
     spine.build(pelvis_jnt=pelvis_jnt, spine_jnts=spine_jnts, base_rig=base_rig)
-    
+    leg.build(leg_jnts=l_leg_jnts, side='l', prefix='leg', rig_scale=1.0, base_rig=base_rig)
+    leg.build(leg_jnts=r_leg_jnts, side= 'r', prefix='leg', rig_scale=1.0, base_rig=base_rig)
     
     
 def make_control_setup(base_rig):

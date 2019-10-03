@@ -7,7 +7,7 @@ import maya.cmds as cmds
 from ..base import module
 from ..base import control
 from rigLib.utils import joint, ribbon
-from rigLib.utils.ribbon import loft_using_curve, create_ep_curve
+from rigLib.utils.ribbon import create_ep_curve
 
 def build(
         pelvis_jnt,
@@ -163,7 +163,7 @@ def build(
         
     #spine_ctrl auto switch
     cmds.addAttr(chest_ctrl.ctrl, shortName='midInfluence', keyable=True, 
-                 defaultValue=1.0, minValue=0.0, maxValue=1.0)
+                 defaultValue=0.0, minValue=0.0, maxValue=1.0)
 
     create_spine_ctrl_auto_switch(chest_ctrl, spine_ctrl_drv)
      
