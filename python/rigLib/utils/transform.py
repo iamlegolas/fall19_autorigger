@@ -56,7 +56,9 @@ def point_snap(driver, driven):
     """
     cmds.delete(cmds.pointConstraint(driver, driven)[0])
     
-
+def snap_pivot(pivot, obj):
+    piv = cmds.xform(pivot, q=True, ws=True, t=True)
+    cmds.xform(obj, ws=True, piv=piv)
     
     
     

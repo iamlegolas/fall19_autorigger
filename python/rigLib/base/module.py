@@ -4,6 +4,7 @@ module for creating top rig structure and rig module
 
 import maya.cmds as cmds
 from . import control
+from .. import utils
 
 scene_object_type = 'rig'
 
@@ -53,6 +54,13 @@ class Base():
                         parent=self.rig_grp,
                         lock_channels=['s', 'v'])
         
+        self.ikfk_ctrl = control.Control(
+                        prefix='ikfk_switch',
+                        shape='fkik_ctrl_template',
+                        scale=scale,
+                        parent=self.master_ctrl.ctrl,
+                        lock_channels=['t', 'r', 's', 'v'])
+        
         self.dnt_grp = cmds.group(name='rig_dnt_grp', empty=True, parent=self.rig_grp) #this will not inherit the rig movement
         cmds.setAttr(self.dnt_grp+'.visibility', False)   
 
@@ -66,7 +74,8 @@ class Module():
             self,
             prefix='new',
             create_dnt_grp=False,
-            base_obj=None
+            base_obj=None,
+            drv_pos_obj=None
             ):
         
         """
@@ -77,7 +86,10 @@ class Module():
         
         self.top_grp = cmds.group(name=prefix+'_module_grp', empty=True)
         
-        self.jnt_grp = cmds.group(name=prefix+'_drv_grp', empty=True, parent=self.top_grp)
+        self.drv_grp = cmds.group(name=prefix+'_drv_grp', empty=True, parent=self.top_grp)
+        if drv_pos_obj != None:
+            utils.transform.snap(drv_pos_obj, self.drv_grp)
+        
         self.ctrl_grp = cmds.group(name=prefix+'_anim_grp', empty=True, parent=self.top_grp)
         
         if create_dnt_grp == True:

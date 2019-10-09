@@ -25,7 +25,7 @@ def list_jnt_hierarchy(top_jnt, with_end_jnts=True):
     return complete_jnts
 
 
-def duplicate(objs, prefix=''):
+def duplicate(objs, prefix='', maintain_hierarchy=False):
     """
     duplicates a list of items and parents duplicates to world
     
@@ -41,5 +41,9 @@ def duplicate(objs, prefix=''):
         dup = cmds.duplicate(obj, name=prefix+'_'+obj, po=True)
         cmds.parent(dup, world=True)
         dup_list.append(dup[0])
+        
+    if maintain_hierarchy == True:
+        for i in range(1, len(dup_list))[::-1]:
+            cmds.parent(dup_list[i], dup_list[i-1])
 
     return dup_list

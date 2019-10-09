@@ -40,6 +40,10 @@ def build(character_name):
     
     #create base
     base_rig = module.Base(character_name=character_name, scale=scene_scale)
+    ikfk_shapes = cmds.listRelatives(base_rig.ikfk_ctrl.ctrl, shapes=True)
+    for shape in ikfk_shapes:
+        cmds.setAttr(shape + '.ove', True) #enable overrides
+        cmds.setAttr(shape + '.ovc', 18)
     
     #import model
     model_file = model_file_path % (main_project_path, character_name)
@@ -58,7 +62,7 @@ def build(character_name):
     #control setup
     spine.build(pelvis_jnt=pelvis_jnt, spine_jnts=spine_jnts, base_rig=base_rig)
     leg.build(leg_jnts=l_leg_jnts, side='l', prefix='leg', rig_scale=1.0, base_rig=base_rig)
-    leg.build(leg_jnts=r_leg_jnts, side= 'r', prefix='leg', rig_scale=1.0, base_rig=base_rig)
+#    leg.build(leg_jnts=r_leg_jnts, side= 'r', prefix='leg', rig_scale=1.0, base_rig=base_rig)
     
     
 def make_control_setup(base_rig):
