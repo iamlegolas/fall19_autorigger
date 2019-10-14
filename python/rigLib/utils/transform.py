@@ -6,6 +6,7 @@ functions to manipulate and create transforms
 
 import maya.cmds as cmds
 from . import name
+from pymel.api.plugins import Transform
 
 def make_offset_grp(obj, prefix=''):
     """
@@ -59,6 +60,36 @@ def point_snap(driver, driven):
 def snap_pivot(pivot, obj):
     piv = cmds.xform(pivot, q=True, ws=True, t=True)
     cmds.xform(obj, ws=True, piv=piv)
+    
+def setup_distance_dimension_node(prefix, start_obj, end_obj):
+    transform_node = prefix+'_distance_dim'
+    shape_node = cmds.createNode('distanceDimShape', n=transform_node+'_shape')    
+    cmds.rename(cmds.listRelatives(shape_node, parent=True)[0], transform_node)
+    
+    start_obj_dcmps_node = prefix+'_start_obj_decomposeMatrix_node'
+    end_obj_dcmps_node = prefix+'_end_obj_decomposeMatrix_node'
+    cmds.shadingNode('decomposeMatrix', asUtility=True, name=start_obj_dcmps_node)
+    cmds.shadingNode('decomposeMatrix', asUtility=True, name=end_obj_dcmps_node)
+    
+    cmds.connectAttr(start_obj+'.worldMatrix[0]', start_obj_dcmps_node+'.inputMatrix')
+    cmds.connectAttr(end_obj+'.worldMatrix[0]', end_obj_dcmps_node+'.inputMatrix')
+    
+    cmds.connectAttr(start_obj_dcmps_node+'.outputTranslate', shape_node+'.startPoint')
+    cmds.connectAttr(end_obj_dcmps_node+'.outputTranslate', shape_node+'.endPoint')
+    
+    return [transform_node, shape_node]
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

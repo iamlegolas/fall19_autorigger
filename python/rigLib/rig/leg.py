@@ -9,11 +9,12 @@ from ..base import control
 from rigLib.utils import joint, limbs, transform
 
 def build(
-        leg_jnts,
+        bnd_jnts,
         side='l',
         prefix='leg',
         rig_scale=1.0,
-        base_rig=None
+        base_rig=None,
+        hip_ctrl=None
         ):
     
     """
@@ -29,17 +30,18 @@ def build(
     rig_module = module.Module(prefix=side+'_'+prefix, base_obj=base_rig, create_dnt_grp=True, drv_pos_obj='pelvis')
     
     #create drv skels
-    ik_leg_jnts = joint.duplicate(leg_jnts, prefix='ik', maintain_hierarchy=True)
-    fk_leg_jnts = joint.duplicate(leg_jnts, prefix='fk', maintain_hierarchy=True)
+    ik_leg_jnts = joint.duplicate(bnd_jnts, prefix='ik', maintain_hierarchy=True)
+    fk_leg_jnts = joint.duplicate(bnd_jnts, prefix='fk', maintain_hierarchy=True)
     cmds.parent(ik_leg_jnts[0], fk_leg_jnts[0], rig_module.drv_grp)
+    cmds.parentConstraint(hip_ctrl.ctrl, rig_module.drv_grp, mo=True)
     
     #create IK controls
     ik_anim_grp = side+'_'+prefix+'_ik_anim_grp'
     cmds.group(n=ik_anim_grp, em=True, p=rig_module.ctrl_grp)
     
-    temp_pole_loc = limbs.create_pole_vector_locator(side+'_'+prefix, leg_jnts[1], [0,-30,0])
+    temp_pole_loc = limbs.create_pole_vector_locator(side+'_'+prefix, bnd_jnts[1], [0,-30,0])
     ik_foot_ctrl = control.Control(shape=side+'_foot_ctrl_template', prefix=side+'_foot_IK',
-                                translate_to=leg_jnts[2], scale=rig_scale,
+                                translate_to=bnd_jnts[2], scale=rig_scale,
                                 parent=ik_anim_grp, lock_channels=['s', 'v'])
     
     ik_knee_ctrl = control.Control(shape='sphere_ctrl_template', prefix=side+'_knee_IK',
@@ -51,27 +53,29 @@ def build(
     #create FK controls
     fk_anim_grp = side+'_'+prefix+'_fk_anim_grp'
     cmds.group(n=fk_anim_grp, em=True, p=rig_module.ctrl_grp)
+#    transform.snap('pelvis', fk_anim_grp)
+    transform.snap(hip_ctrl.ctrl, fk_anim_grp)
 
     fk_thigh_ctrl = control.Control(shape='cube_ctrl_template', prefix=side+'_thigh_FK',
-                                    translate_to=[leg_jnts[0], leg_jnts[1]], rotate_to=leg_jnts[0],
+                                    translate_to=[bnd_jnts[0], bnd_jnts[1]], rotate_to=bnd_jnts[0],
                                     scale=rig_scale, parent=fk_anim_grp, 
                                     lock_channels=['s', 'v'])
-    transform.snap_pivot(leg_jnts[0], fk_thigh_ctrl.ctrl)
-    transform.snap_pivot(leg_jnts[0], fk_thigh_ctrl.ofst)
+    transform.snap_pivot(bnd_jnts[0], fk_thigh_ctrl.ctrl)
+    transform.snap_pivot(bnd_jnts[0], fk_thigh_ctrl.ofst)
     
     fk_calf_ctrl = control.Control(shape='cube_ctrl_template', prefix=side+'_calf_FK',
-                                    translate_to=[leg_jnts[1], leg_jnts[2]], rotate_to=leg_jnts[1],
+                                    translate_to=[bnd_jnts[1], bnd_jnts[2]], rotate_to=bnd_jnts[1],
                                     scale=rig_scale*0.7, parent=fk_thigh_ctrl.ctrl, 
                                     lock_channels=['s', 'v'])
-    transform.snap_pivot(leg_jnts[1], fk_calf_ctrl.ctrl)
-    transform.snap_pivot(leg_jnts[1], fk_calf_ctrl.ofst)
+    transform.snap_pivot(bnd_jnts[1], fk_calf_ctrl.ctrl)
+    transform.snap_pivot(bnd_jnts[1], fk_calf_ctrl.ofst)
     
     fk_foot_ctrl = control.Control(shape='cube_ctrl_template', prefix=side+'_foot_FK',
-                                translate_to=[leg_jnts[2], leg_jnts[3]], rotate_to=leg_jnts[3],
+                                translate_to=[bnd_jnts[2], bnd_jnts[3]], rotate_to=bnd_jnts[3],
                                 scale=rig_scale*0.6, parent=fk_calf_ctrl.ctrl, 
                                 lock_channels=['s', 'v'])
-    transform.snap_pivot(leg_jnts[2], fk_foot_ctrl.ctrl)
-    transform.snap_pivot(leg_jnts[2], fk_foot_ctrl.ofst)
+    transform.snap_pivot(bnd_jnts[2], fk_foot_ctrl.ctrl)
+    transform.snap_pivot(bnd_jnts[2], fk_foot_ctrl.ofst)
         
     #hook up FK ctrls
     fk_ctrl_list = [fk_thigh_ctrl, fk_calf_ctrl, fk_foot_ctrl]
@@ -89,9 +93,22 @@ def build(
     cmds.poleVectorConstraint(ik_knee_ctrl.ctrl, leg_ik_handle)
     
     #set up ik/fk switch
-    limbs.setup_ikfk_switch(base_rig, side, prefix, 
-                            ik_leg_jnts[0:3], fk_leg_jnts[0:3], leg_jnts[0:3], 
+    limbs.setup_ikfk_switch(base_rig.ikfk_ctrl, side, prefix, 
+                            ik_leg_jnts[0:3], fk_leg_jnts[0:3], bnd_jnts[0:3], 
                             ik_anim_grp, fk_anim_grp)
+    
+    #set up twist joints
+    limbs.create_twist_jnts(side+'_'+prefix, bnd_jnts)
+    
+    #set up fk space switching
+    limbs.setup_fk_space_switching(side+'_'+prefix, fk_anim_grp, 
+                                   fk_leg_jnts, base_rig.master_ctrl.ctrl, 
+                                   fk_thigh_ctrl.ofst)
+    cmds.parentConstraint(hip_ctrl.ctrl, fk_anim_grp, mo=True)
+    
+    #set up limb stretching
+#    limbs.setup_limb_stretch(prefix, rig_module, ik_leg_jnts, ik_ctrl_list)
+    limbs.add_ikpop_counter(side+prefix, ik_leg_jnts, bnd_jnts, ik_foot_ctrl.ctrl)
     
     #cleanup
     

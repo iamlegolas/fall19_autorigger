@@ -183,6 +183,8 @@ def build(
                     ribbon_clstrs_grp, spine_sfc_grp, spine_deformers_grp],
                  rig_module.dnt_grp)
     
+    return [chest_ctrl, spine_ctrl, hip_ctrl, body_ctrl]
+
 
 def connect_body_ctrl_to_ribbon(body_ctrl, twist_handle):    
     twist_mult_node = 'spine_twist_body_mult_node'

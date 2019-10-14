@@ -57,12 +57,12 @@ def build(character_name):
     cmds.parent(root_bnd_jnt, base_rig.top_grp)
     
     #deform setup
-    character_deform.build(base_rig, character_name)
+#    character_deform.build(base_rig, character_name)
     
     #control setup
-    spine.build(pelvis_jnt=pelvis_jnt, spine_jnts=spine_jnts, base_rig=base_rig)
-    leg.build(leg_jnts=l_leg_jnts, side='l', prefix='leg', rig_scale=1.0, base_rig=base_rig)
-#    leg.build(leg_jnts=r_leg_jnts, side= 'r', prefix='leg', rig_scale=1.0, base_rig=base_rig)
+    spine_ctrl_list = spine.build(pelvis_jnt=pelvis_jnt, spine_jnts=spine_jnts, base_rig=base_rig)
+    leg.build(bnd_jnts=l_leg_jnts, side='l', prefix='leg', rig_scale=1.0, base_rig=base_rig, hip_ctrl=spine_ctrl_list[2])
+#    leg.build(bnd_jnts=r_leg_jnts, side= 'r', prefix='leg', rig_scale=1.0, base_rig=base_rig)
     
     
 def make_control_setup(base_rig):
