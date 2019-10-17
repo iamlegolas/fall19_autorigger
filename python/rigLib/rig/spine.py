@@ -57,7 +57,7 @@ def build(
     #SET UP RIBBON
     #create ribbon surface and add follicles
     ribbon.create_cv_curve('temp_spine_ribbon_crv_01', spine_jnts)
-    ribbon_sfc = ribbon.loft_using_curve('temp_spine_ribbon_crv_01', 8, prefix)
+    ribbon_sfc = ribbon.loft_using_curve('temp_spine_ribbon_crv_01', 8, 'x', prefix)
     spine_follicles = ribbon.add_follicles(ribbon_sfc, 4)
     spine_ik_jnts = joint.duplicate(spine_jnts, prefix='ik')
 

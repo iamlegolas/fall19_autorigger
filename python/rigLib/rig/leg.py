@@ -6,7 +6,7 @@ import maya.cmds as cmds
 
 from ..base import module
 from ..base import control
-from rigLib.utils import joint, limbs, transform
+from rigLib.utils import joint, limbs, transform, ribbon
 
 def build(
         bnd_jnts,
@@ -109,6 +109,12 @@ def build(
     #set up limb stretching
 #    limbs.setup_limb_stretch(prefix, rig_module, ik_leg_jnts, ik_ctrl_list)
     limbs.add_ikpop_counter(side+prefix, ik_leg_jnts, bnd_jnts, ik_foot_ctrl.ctrl)
+    
+    #set up ribbon
+    ribbon.create_ep_curve('temp_'+prefix+'_ribbon_crv_01', 
+                           [bnd_jnts[0], bnd_jnts[1], bnd_jnts[2]], degree=1)
+    ribbon_sfc = ribbon.loft_using_curve('temp_'+prefix+'_ribbon_crv_01', 8, 'z', prefix)
+
     
     #cleanup
     

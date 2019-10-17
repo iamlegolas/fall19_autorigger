@@ -54,7 +54,7 @@ def get_curve_num_cvs(curve):
     
     
         
-def loft_using_curve(curve, width, prefix):
+def loft_using_curve(curve, width, axis, prefix):
     """
     duplicate curve and loft
     
@@ -63,18 +63,36 @@ def loft_using_curve(curve, width, prefix):
     @param prefix: str, name of body part for which the ribbon is being constructed
     @return: str: name of the created ribbon nurbs surface object
     """
-    curve_pos = cmds.xform(curve, q=True, ws=True, t=True)
-    curve_02 = cmds.duplicate(curve)
-    
-    cmds.xform(curve, ws=True, t=(curve_pos[0]+(width/2),0,0))
-    cmds.xform(curve_02, ws=True, t=(curve_pos[0]+(width/-2),0,0))
+    curve_02 = cmds.duplicate(curve)[0]
+
+    curve_cv_list = []    
+    curve_02_cv_list = []
+    for i in range(get_curve_num_cvs(curve)):
+        curve_cv_list.append(curve+'.cv[%d]' % i)
+        curve_02_cv_list.append(curve_02+'.cv[%d]' % i)
+    print curve_cv_list
+    print curve_02_cv_list
+        
+    if axis=='x':
+        cmds.move( width/2,0,0, curve_cv_list, relative=True, cs=True, ls=True, wd=True )
+        cmds.move( width/-2,0,0, curve_02_cv_list, relative=True, cs=True, ls=True, wd=True )
+    elif axis=='y':
+        cmds.move( 0,width/2,0, curve_cv_list, relative=True, cs=True, ls=True, wd=True )
+        cmds.move( 0,width/-2,0, curve_02_cv_list, relative=True, cs=True, ls=True, wd=True )
+    elif axis=='z':
+        cmds.move( 0,0,width/2, curve_cv_list, relative=True, cs=True, ls=True, wd=True )
+        cmds.move( 0,0,width/-2, curve_02_cv_list, relative=True, cs=True, ls=True, wd=True )
+    else:
+        print 'Invalid entry for "axis" parameter.'
+        return None
     
     ribbon_sfc = prefix+'_ribbon_sfc'
     cmds.loft(curve, curve_02, name=ribbon_sfc, 
               ch=True, u=True, ar=True, po=0, d=1, ss=1)
     cmds.delete(curve, curve_02)
+    '''NEED A SEPARATE FUNCTION FOR REBUILDING SURFACES'''
     cmds.rebuildSurface(ribbon_sfc, su=0, sv=3, du=1, dv=3, ch=True)
-    cmds.reverseSurface(ribbon_sfc, ch=True, rpo=True, d=0 )
+#    cmds.reverseSurface(ribbon_sfc, ch=True, rpo=True, d=0 )
     
     return ribbon_sfc
 
