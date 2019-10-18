@@ -114,7 +114,7 @@ def build(
     ribbon.create_ep_curve('temp_'+prefix+'_ribbon_crv_01', 
                            [bnd_jnts[0], bnd_jnts[1], bnd_jnts[2]], degree=1)
     ribbon_sfc = ribbon.loft_using_curve('temp_'+prefix+'_ribbon_crv_01', 8, 'z', prefix)
-
+    
     
     #cleanup
     

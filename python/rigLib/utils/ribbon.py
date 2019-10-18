@@ -91,7 +91,7 @@ def loft_using_curve(curve, width, axis, prefix):
               ch=True, u=True, ar=True, po=0, d=1, ss=1)
     cmds.delete(curve, curve_02)
     '''NEED A SEPARATE FUNCTION FOR REBUILDING SURFACES'''
-    cmds.rebuildSurface(ribbon_sfc, su=0, sv=3, du=1, dv=3, ch=True)
+#    cmds.rebuildSurface(ribbon_sfc, su=0, sv=3, du=1, dv=3, ch=True)
 #    cmds.reverseSurface(ribbon_sfc, ch=True, rpo=True, d=0 )
     
     return ribbon_sfc

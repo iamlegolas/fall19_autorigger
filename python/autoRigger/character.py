@@ -18,6 +18,8 @@ main_project_path = project.main_project_path
 model_file_path = '%s/%s/model/geo.mb'
 builder_file_path = '%s/%s/builder/skel.mb' 
 
+print builder_file_path
+
 root_bnd_jnt = 'root'
 head_bnd_jnt = 'head_bnd'
 
