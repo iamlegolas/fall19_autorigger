@@ -55,7 +55,7 @@ def make_twist_jnts(base_rig, parent_jnts):
         cmds.hide(twist_ik)
         cmds.parent(twist_ik, twist_jnt_grp)
         cmds.parentConstraint(parent_jnt_child, twist_ik)
-
+    
 def save_skin_weights(character_name, geo_list=[]):
     """
     save weights for character geometry objects

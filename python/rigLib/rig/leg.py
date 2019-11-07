@@ -108,12 +108,38 @@ def build(
     
     #set up limb stretching
 #    limbs.setup_limb_stretch(prefix, rig_module, ik_leg_jnts, ik_ctrl_list)
-    limbs.add_ikpop_counter(side+prefix, ik_leg_jnts, bnd_jnts, ik_foot_ctrl.ctrl)
+    limbs.add_ikpop_counter(side+'_'+prefix, ik_leg_jnts, bnd_jnts, ik_foot_ctrl.ctrl)
     
     #set up ribbon
     ribbon.create_ep_curve('temp_'+prefix+'_ribbon_crv_01', 
                            [bnd_jnts[0], bnd_jnts[1], bnd_jnts[2]], degree=1)
-    ribbon_sfc = ribbon.loft_using_curve('temp_'+prefix+'_ribbon_crv_01', 8, 'z', prefix)
+    ribbon_sfc = ribbon.loft_using_curve('temp_'+prefix+'_ribbon_crv_01', 10, 'z', side+'_'+prefix)
+    
+    cmds.rebuildSurface(ribbon_sfc, su=0, sv=11, du=1, dv=3, ch=True)
+    limb_foll_list = ribbon.add_follicles(ribbon_sfc, 11, on_edges=False, create_joints=True)
+    limb_foll_jnts_list = limb_foll_list[1]
+    limb_foll_list = limb_foll_list[0]
+    
+    for jnt in limb_foll_jnts_list:
+        cmds.xform(jnt, os=True, ro=[-90,0,90])
+        cmds.makeIdentity(jnt, t=0, r=1, s=0, apply=True)
+    
+    limb_follicles_grp = '_'.join([side,prefix,'follicles','grp'])
+    cmds.group(limb_foll_list, n=limb_follicles_grp)
+    
+    #set up blendshapes
+    leg_drv_jnts = [u'thigh_l', u'calf_l', u'ankle_l', u'calf_l_twist', u'thigh_l_twist']
+    cmds.select(leg_drv_jnts, ribbon_sfc)
+    limb_ribbon_clstr = cmds.skinCluster(tsb=True, dr=4.5)
+    
+    shape = cmds.listRelatives(ribbon_sfc, shapes=True)[0]
+    #'body_geo' must have a skinCluster associated with it.
+    geo_skin_clstr = cmds.listConnections(shape, type='skinCluster')[0]
+    
+    limbs.create_deformer_blend(side+'_'+prefix, ribbon_sfc, geo_skin_clstr, 
+                                ik_foot_ctrl.ctrl, limb_foll_jnts_list, num_jnts=3)
+
+
     
     
     #cleanup

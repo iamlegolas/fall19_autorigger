@@ -4,6 +4,8 @@ has different service functions required while working with ribbons
 """
 
 import maya.cmds as cmds
+from _ast import Num
+from . import name 
 
 def create_cv_curve(curve, pos_ref_list, degree=3):
     """
@@ -97,7 +99,7 @@ def loft_using_curve(curve, width, axis, prefix):
     return ribbon_sfc
 
 
-def add_follicles(sfc_shape, num_foll=1):
+def add_follicles(sfc_shape, num_foll=1, on_edges=True, create_joints=False):
     """
     create as many equidistant follicles along the length of a surface
     
@@ -106,14 +108,29 @@ def add_follicles(sfc_shape, num_foll=1):
     @return: list(str): list of follicles
     """
     foll_list = []
+    jnt_list = []
     for i in range(0, num_foll):
-        foll = create_follicle('spine_ribbon_sfc', 0.5, i/(num_foll-1.00))
+        if on_edges:
+            foll = create_follicle(sfc_shape, 0.5, i/(num_foll-1.00))
+        else:
+            foll = create_follicle(sfc_shape, 0.5, ((1.0/num_foll)*i)+(0.5/num_foll))
         foll_list.append(foll)
         
+        if create_joints:
+            temp_jnt = '_'.join((name.remove_suffix(sfc_shape),'jnt',str(i+1).zfill(2)))
+            cmds.select(d=True)
+            cmds.joint(name=temp_jnt)
+            cmds.delete(cmds.parentConstraint(foll, temp_jnt))
+            jnt_list.append(temp_jnt)
+            cmds.parent(temp_jnt, foll)
+            cmds.makeIdentity(temp_jnt, t=0, r=1, s=0, apply=True)
+            
     #foll_grp = sfc_shape+'_follicles_grp'
     #cmds.group(name=foll_grp, world=True, em=True)
     #cmds.parent(foll_list, foll_grp)
     
+    if create_joints:
+        return [foll_list, jnt_list]
     return foll_list
 
 
